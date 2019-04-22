@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>WDV221 Intro Javascript</title>
+
+<script>
+
+    // Zachary Hayes
+    // Intro to Javascript
+    
+    
+    /* ADDED FEATURES
+    
+    Players and scores are stored in a cookie for 15 days. 
+    
+    When a user reloads the page their player information (including wins and attempts) will still be on the page.  
+    
+    If you type a previous player's name into the textbox and press 'New Player', their score will load as well (even if the page has been reloaded).
+    
+    For example, if you start off as a player named "Fred" and win 6 of 10 games, close down your browser, and then later your friend "Michael" plays and the score is reset--if you type "Fred" and press 'New Player' your score will be restored to 6 wins.
+    
+    Scores can be reset.
+    
+    Methods related to these new features are located at line 161 "Final Functions"
+    */
+    
+    
+
+	//---Global Vars---
+	var PlayerName = "New Player";
+	var Wins = 0;
+	var Attempts = 0;
+	var Dice1Value;
+	var Dice2Value;
+    var valueToBeatOrEqual = 7;
+	//------------
+
+	//--Player Functions--
+    
+	function newPlayer()
+	{
+		PlayerName = document.getElementById("playerNameTxt").value;
+        if(checkIfPlayerExists(PlayerName))
+        {
+            loadScore();
+        }
+        else
+        {
+            Wins = 0;
+            Attempts = 0;
+            resetWinsSection();
+        }
+        playerWelcome();
+        save();
+	}
+	//-----------
+	
+	//--User Settings	
+	function formatSelectOption(inOption, inValue)
+	{
+		return "<option value='" + inValue + "'>" + inOption + "</option>";	
+	}
+	
+	function getSelectedSettingOptionText()
+	{
+		var x = document.getElementById("SettingsSelectList");		
+		return x.selectedOptions[0].innerHTML;
+	}
+	
+	function userSettingChanged()
+	{
+		var msg = "Settings changed to " +  getSelectedSettingOptionText();
+		document.getElementById("SettingsMessage").innerHTML = msg;
+        valueToBeatOrEqual = getUserSettingValue();
+		return;
+	}
+    
+    function getUserSettingValue()
+    {
+        return document.getElementById("SettingsSelectList").value;
+    }
+	//----------
+	
+	
+	//--Score Functions--
+	
+	function addAttempt(inWin)
+	{
+		Attempts++;
+        
+		if(inWin) { Wins++; }
+        
+        save();
+		setWins();
+		return;
+	}
+    
+	function setWins()
+	{
+		var winsMsg =  PlayerName + " has " + Wins + " wins";
+		winsMsg += " over " + Attempts + " attempts"
+		document.getElementById("WinsSection").innerHTML = winsMsg;
+		return;
+	}
+	
+	
+	//--Dice/Gameplay Functions--
+	function adjustImage(inID, inImagePath)
+	{
+		document.getElementById(inID).src = inImagePath;
+		return;
+	}
+	
+	function adjustDiceImage(inDiceID, inDiceValue)
+	{
+		var diceImage = "Images/"+inDiceValue+".PNG"
+		document.getElementById(inDiceID).src = diceImage;
+		return;
+	}
+	
+	function rollDice()
+	{
+		Dice1Value = roll();
+		Dice2Value = roll();
+		adjustDiceImage("dice1", Dice1Value);
+		adjustDiceImage("dice2", Dice2Value);
+		var total = setDiceValue();
+        addAttempt(didMyRollWin(total));
+	}
+	
+	function roll()
+	{
+		return getRndInteger(1,6);
+	}
+    
+	function getRndInteger(min, max) 
+	{
+		return Math.floor(Math.random() * (max - min + 1) ) + min;
+	}
+	
+	function setDiceValue()
+	{
+		var total = Dice1Value+Dice2Value;
+		var diceValueMessage = "You rolled " + total;
+		document.getElementById("DiceValueSection").innerHTML = diceValueMessage;
+        return total;
+	}
+    
+    function didMyRollWin(rollTotal)
+    {
+        if(rollTotal >= valueToBeatOrEqual)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+	
+	//--Final Functions--
+    
+    var cookieLife = 15; // days
+    
+    function save()
+    {
+        saveToken = generateSaveToken();
+        setCookie("previousPlayer", PlayerName);
+        setCookie(PlayerName, saveToken);
+    }
+    
+    function generateSaveToken()
+    {
+        return Wins + "&" + Attempts;
+    }
+    
+    function setCookie(cname, cvalue)
+    {
+        document.cookie = cname + "=" + cvalue + ";" + getExpiration() + ";path=/";
+    }
+    
+    function getExpiration()
+    {
+        var date = new Date();
+        date.setTime(date.getTime() + (cookieLife * 24 * 60 * 60 * 1000));
+        return "expires=" + date.toUTCString(); 
+    }
+    
+    function getCookie(cname)
+    {
+        var name = cname + "=";
+        var cookieArray = document.cookie.split(';');
+        
+        for(var i = 0; i < cookieArray.length; i++)
+        {
+            var c = cookieArray[i];
+            
+            while(c.charAt(0) == ' ')
+            {
+                c = c.substring(1);
+            }
+            if(c.indexOf(name) == 0)
+            {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+    
+    function loadGame()
+    {        
+        loadPreviousPlayer();
+        playerWelcome();
+    }
+	
+    function loadPreviousPlayer()
+    {
+        var previousPlayer = getCookie("previousPlayer");
+        
+        if(previousPlayer != "")
+        {
+            PlayerName = previousPlayer;
+            loadScore();
+        }
+    }
+    
+    function loadScore()
+    {
+        var scoreToken = getCookie(PlayerName);
+        var scoreArray = parseToken(scoreToken);
+        Wins = scoreArray[0];
+        Attempts = scoreArray[1];
+        setWins();
+    }
+    
+    function parseToken(token)
+    {
+        return token.split('&');
+    }
+    
+    function playerWelcome()
+    {
+        document.getElementById("playerNameWelcome").innerHTML = PlayerName;
+    }
+    
+    function resetWinsSection()
+    {
+        document.getElementById("WinsSection").innerHTML = "";
+    }
+    
+    function checkIfPlayerExists()
+    {
+        if(getCookie(PlayerName) != "")
+        {
+           return true;
+        }
+        
+        return false;
+    }
+    
+    function resetScore()
+    {
+        Wins = 0;
+        Attempts = 0;
+        setWins();
+        save();
+    }
+
+  </script>
+  
+
+
+</head>
+
+<body id="mainBody">
+
+
+<h1>Welcome <span id="playerNameWelcome"></span> </h1>
+
+<input type="text" id="playerNameTxt" placeholder="New Player"/>
+<input type="button" value="New Player" id="newPlayerButton" 
+		onclick="newPlayer()"/>
+
+
+<h2 id="SettingsHeader">Settings</h2>
+	<p id="SettingsMessage"></p>
+	<!--Settings Section -->
+	<select id="SettingsSelectList" onchange="userSettingChanged();">
+	<script>
+		//Use JS to fill the list
+		document.write(formatSelectOption("Easy",3));
+		document.write(formatSelectOption("Regular",7));
+		document.write(formatSelectOption("Hard",10));
+		
+		
+	</script>
+	</select>
+
+
+	<h1>Score</h1>
+<p id="WinsSection">&nbsp;</p>
+
+	
+<br/>
+
+<img src="" id="dice1"  height="50px" width="50px"/>
+<img src="" id="dice2" height="50px" width="50px"/>
+
+<p id="DiceValueSection">&nbsp;</p>
+
+
+<br/>
+
+<button onclick="rollDice();">Roll</button>
+<button onclick="resetScore();">Reset Score</button>
+
+
+<script>
+	
+	
+	
+	adjustImage("dice1", "Images/1.PNG");
+	adjustImage("dice2", "Images/1.PNG");
+	
+	
+	
+</script>
+
+<script>loadGame();</script>
+
+<script>
+	/* Previous instructions
+	---Runtime Scripts--
+	Unit 1 and 2
+		Use JS to created a List with the values of Easy, Regular, and Hard
+			Easy = 2, Regular = 7, Hard = 10?
+		
+		Create a global variable called Name
+		Use a prompt to gather the name and fill in the variable
+		Use a runtime script to say "Welcome <name>" (Welcome Matt
+		
+		Create a global variable called wins and set it's intial value to 0
+		use a runtime script to log it to the console "You have 0 wins"
+	*/
+	/*
+		Unit 3 And Unit 4(functions)
+		
+	1. write a function that alerts the value in the global variable wins
+		call with a runtime script (this will be 0)
+		Format the message to say "<name> has <wins> wins" example "Matt Has 0 wins"
+		Replace the console.log with a call to this function
+	
+	2. write a function that takes a string and value and returns the results wrapped in HTML option
+		Example fxn("easy", 2) returns "<option value='2'>easy</option>"
+		Modify the list creation to call the function
+
+---Event Driven---
+Unit 5 Events
+	Write a function that triggers from the change of the list to display a message in the SettingsMessage html depending on the difficulty settings
+		Use the procided getSelectedSettingOptionText function to get the difficulty
+		Display the message "Settings changed to <difficulty" for example "Settings changed to hard"
+
+
+	Write a function that adjusts src of an image.
+	This will take the id of the image, and the path to the image.
+		ex: adjustImage(inID, inImagePath)
+	Call the function twice to set the image of dice1 and dice2 to "1.PNG"
+
+	
+	Change the wins button to fill in the HTML WinsSection with the message of wins for player.
+		
+	*/
+</script>
+
+</body>
+</html>
