@@ -104,7 +104,7 @@
 		document.getElementById("WinsSection").innerHTML = winsMsg;
 		return;
 	}
-	
+    //----------
 	
 	//--Dice/Gameplay Functions--
 	function adjustImage(inID, inImagePath)
@@ -159,6 +159,7 @@
             return false;
         }
     }
+	//----------
 	
 	//--Final Functions--
     
@@ -210,7 +211,9 @@
     }
     
     function loadGame()
-    {        
+    {   
+        adjustImage("dice1", "Images/1.PNG");
+        adjustImage("dice2", "Images/1.PNG");	
         loadPreviousPlayer();
         playerWelcome();
     }
@@ -267,6 +270,7 @@
         setWins();
         save();
     }
+	//----------
 
   </script>
   
@@ -316,63 +320,7 @@
 <button onclick="rollDice();">Roll</button>
 <button onclick="resetScore();">Reset Score</button>
 
-
-<script>
-	
-	
-	
-	adjustImage("dice1", "Images/1.PNG");
-	adjustImage("dice2", "Images/1.PNG");
-	
-	
-	
-</script>
-
 <script>loadGame();</script>
-
-<script>
-	/* Previous instructions
-	---Runtime Scripts--
-	Unit 1 and 2
-		Use JS to created a List with the values of Easy, Regular, and Hard
-			Easy = 2, Regular = 7, Hard = 10?
-		
-		Create a global variable called Name
-		Use a prompt to gather the name and fill in the variable
-		Use a runtime script to say "Welcome <name>" (Welcome Matt
-		
-		Create a global variable called wins and set it's intial value to 0
-		use a runtime script to log it to the console "You have 0 wins"
-	*/
-	/*
-		Unit 3 And Unit 4(functions)
-		
-	1. write a function that alerts the value in the global variable wins
-		call with a runtime script (this will be 0)
-		Format the message to say "<name> has <wins> wins" example "Matt Has 0 wins"
-		Replace the console.log with a call to this function
-	
-	2. write a function that takes a string and value and returns the results wrapped in HTML option
-		Example fxn("easy", 2) returns "<option value='2'>easy</option>"
-		Modify the list creation to call the function
-
----Event Driven---
-Unit 5 Events
-	Write a function that triggers from the change of the list to display a message in the SettingsMessage html depending on the difficulty settings
-		Use the procided getSelectedSettingOptionText function to get the difficulty
-		Display the message "Settings changed to <difficulty" for example "Settings changed to hard"
-
-
-	Write a function that adjusts src of an image.
-	This will take the id of the image, and the path to the image.
-		ex: adjustImage(inID, inImagePath)
-	Call the function twice to set the image of dice1 and dice2 to "1.PNG"
-
-	
-	Change the wins button to fill in the HTML WinsSection with the message of wins for player.
-		
-	*/
-</script>
 
 </body>
 </html>
